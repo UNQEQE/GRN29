@@ -728,7 +728,7 @@ function App() {
                      borderRadius: '20px', 
                      border: '1px solid var(--border-color)', 
                      background: selectedCategoryFilter === cat ? 'var(--text-primary)' : 'transparent', 
-                     color: selectedCategoryFilter === cat ? 'var(--bg-primary)' : 'var(--text-primary)', 
+                     color: selectedCategoryFilter === cat ? 'var(--bg-color)' : 'var(--text-primary)', 
                      cursor: 'pointer',
                      fontWeight: 'bold',
                      transition: 'all 0.3s ease'
