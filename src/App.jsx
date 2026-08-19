@@ -166,6 +166,7 @@ function App() {
   const [newProductDesc, setNewProductDesc] = useState('');
   const [newProductCategory, setNewProductCategory] = useState('Conjuntos');
   const [newProductImage, setNewProductImage] = useState('');
+  const [newProductSizes, setNewProductSizes] = useState('');
 
   // Admin Promo Codes States
   const [newPromoCode, setNewPromoCode] = useState('');
@@ -445,7 +446,8 @@ function App() {
             discountPrice: formattedDiscount,
             description: newProductDesc,
             category: newProductCategory,
-            image: newProductImage
+            image: newProductImage,
+            sizes: newProductSizes.split(',').map(s => s.trim()).filter(s => s !== '')
           };
         }
         return p;
@@ -461,6 +463,7 @@ function App() {
         description: newProductDesc,
         category: newProductCategory,
         image: newProductImage,
+        sizes: newProductSizes.split(',').map(s => s.trim()).filter(s => s !== ''),
         inStock: true
       };
       setProductList(prev => [...prev, newProduct]);
@@ -473,6 +476,7 @@ function App() {
     setNewProductDesc('');
     setNewProductCategory('Conjuntos');
     setNewProductImage('');
+    setNewProductSizes('');
     showToast('Producto guardado correctamente.');
   };
 
@@ -484,6 +488,7 @@ function App() {
     setNewProductDesc(product.description);
     setNewProductCategory(product.category);
     setNewProductImage(product.image);
+    setNewProductSizes(product.sizes ? product.sizes.join(', ') : '');
   };
 
   const handleDeleteProduct = (productId) => {
@@ -777,7 +782,7 @@ function App() {
               <div className="size-selector">
                 <span className="size-label">Seleccionar Talla</span>
                 <div className="size-options">
-                  {['S', 'M', 'L', 'XL'].map(size => (
+                  {(selectedProduct.sizes && selectedProduct.sizes.length > 0 ? selectedProduct.sizes : ['S', 'M', 'L', 'XL']).map(size => (
                     <button 
                       key={size} 
                       onClick={() => selectedProduct.inStock && setSelectedSize(size)}
@@ -1038,6 +1043,16 @@ function App() {
                   </div>
 
                   <div className="form-group">
+                    <label>Tallas (separadas por coma)</label>
+                    <input 
+                      type="text" 
+                      value={newProductSizes}
+                      onChange={(e) => setNewProductSizes(e.target.value)}
+                      placeholder="Ej. S, M, L, XL"
+                    />
+                  </div>
+
+                  <div className="form-group">
                     <label>Imagen del Producto</label>
                     <input 
                       type="file" 
@@ -1067,6 +1082,7 @@ function App() {
                           setNewProductDesc('');
                           setNewProductCategory('Conjuntos');
                           setNewProductImage('');
+                          setNewProductSizes('');
                         }} 
                         className="cancel-edit-btn"
                       >
@@ -1088,7 +1104,10 @@ function App() {
                       
                       <div className="inventory-info">
                         <h3>{product.name}</h3>
-                        <span className="inventory-meta">{product.category} | {product.price}</span>
+                        <span className="inventory-meta">
+                          {product.category} | {product.price}
+                          {product.sizes && product.sizes.length > 0 ? ` | Tallas: ${product.sizes.join(', ')}` : ''}
+                        </span>
                         <div className="stock-toggle-box">
                           <span className={`stock-status-text ${product.inStock ? 'in-stock' : 'out-of-stock'}`}>
                             {product.inStock ? '✓ Disponible' : '✕ Agotado'}
