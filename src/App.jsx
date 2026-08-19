@@ -81,6 +81,11 @@ const initialProducts = [
 
 function App() {
   // Persistence States
+  const [categories, setCategories] = useState(() => {
+    const saved = localStorage.getItem('grn29_categories');
+    return saved ? JSON.parse(saved) : ['Conjuntos', 'No-Gi', 'Accesorios', 'Poleras'];
+  });
+
   const [productList, setProductList] = useState(() => {
     const saved = localStorage.getItem('grn29_products');
     return saved ? JSON.parse(saved) : initialProducts;
@@ -165,9 +170,12 @@ function App() {
   const [newProductPrice, setNewProductPrice] = useState('');
   const [newProductDiscountPrice, setNewProductDiscountPrice] = useState('');
   const [newProductDesc, setNewProductDesc] = useState('');
-  const [newProductCategory, setNewProductCategory] = useState('Conjuntos');
+  const [newProductCategory, setNewProductCategory] = useState(categories[0] || '');
   const [newProductImage, setNewProductImage] = useState('');
   const [newProductSizes, setNewProductSizes] = useState('');
+
+  // Admin Category State
+  const [newCategoryInput, setNewCategoryInput] = useState('');
 
   // Admin Promo Codes States
   const [newPromoCode, setNewPromoCode] = useState('');
@@ -199,6 +207,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('grn29_promocodes', JSON.stringify(promoCodes));
   }, [promoCodes]);
+
+  useEffect(() => {
+    localStorage.setItem('grn29_categories', JSON.stringify(categories));
+  }, [categories]);
 
   // Hash Routing Listener
   useEffect(() => {
@@ -516,6 +528,30 @@ function App() {
     }));
   };
 
+  // Admin Categories Actions
+  const handleSaveCategory = (e) => {
+    e.preventDefault();
+    const cat = newCategoryInput.trim();
+    if (!cat) return;
+    if (categories.includes(cat) || cat.toLowerCase() === 'todos') {
+      showToast('La categoría ya existe o es inválida.');
+      return;
+    }
+    setCategories(prev => [...prev, cat]);
+    setNewCategoryInput('');
+    showToast('Categoría creada correctamente.');
+  };
+
+  const handleDeleteCategory = (cat) => {
+    setConfirmModal({
+      message: `¿Seguro que deseas eliminar la categoría "${cat}"? (Los productos existentes mantendrán esta categoría).`,
+      onConfirm: () => {
+        setCategories(prev => prev.filter(c => c !== cat));
+        setConfirmModal(null);
+      }
+    });
+  };
+
   // Admin Promo Codes Actions
   const handleSavePromoCode = (e) => {
     e.preventDefault();
@@ -718,7 +754,7 @@ function App() {
             </header>
 
             <div className="category-filters" style={{ display: 'flex', justifyContent: 'center', gap: '1rem', margin: '2rem 0', flexWrap: 'wrap' }}>
-               {['Todos', 'Conjuntos', 'No-Gi', 'Accesorios', 'Poleras'].map(cat => (
+               {['Todos', ...categories].map(cat => (
                  <button 
                    key={cat} 
                    onClick={() => setSelectedCategoryFilter(cat)}
@@ -1053,10 +1089,7 @@ function App() {
                         value={newProductCategory}
                         onChange={(e) => setNewProductCategory(e.target.value)}
                       >
-                        <option value="Conjuntos">Conjuntos</option>
-                        <option value="No-Gi">No-Gi</option>
-                        <option value="Accesorios">Accesorios</option>
-                        <option value="Poleras">Poleras</option>
+                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                   </div>
@@ -1158,6 +1191,50 @@ function App() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Category Management */}
+            <h2 className="admin-title" style={{ marginTop: '4rem', fontSize: '2rem' }}>Categorías</h2>
+            <div className="admin-layout">
+              {/* Category Form */}
+              <div className="admin-card admin-form-card">
+                <h2>Crear Categoría</h2>
+                <form onSubmit={handleSaveCategory} className="admin-form">
+                  <div className="form-group">
+                    <label>Nombre de Categoría</label>
+                    <input 
+                      type="text" 
+                      value={newCategoryInput}
+                      onChange={(e) => setNewCategoryInput(e.target.value)}
+                      placeholder="Ej. Rashguards"
+                      required
+                    />
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" className="save-product-btn">
+                      Agregar Categoría
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Category List */}
+              <div className="admin-card admin-inventory-card">
+                <h2>Categorías Activas ({categories.length})</h2>
+                <div className="inventory-list">
+                  {categories.map(cat => (
+                    <div key={cat} className="inventory-row" style={{ gridTemplateColumns: '1fr 50px' }}>
+                      <div className="inventory-info">
+                        <h3>{cat}</h3>
+                      </div>
+                      <div className="inventory-actions">
+                        <button onClick={() => handleDeleteCategory(cat)} className="inv-btn delete-btn" title="Eliminar">🗑️</button>
+                      </div>
+                    </div>
+                  ))}
+                  {categories.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>No hay categorías.</p>}
                 </div>
               </div>
             </div>
