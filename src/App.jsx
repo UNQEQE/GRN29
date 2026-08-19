@@ -122,6 +122,7 @@ function App() {
   });
   
   const [selectedSize, setSelectedSize] = useState('M');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Todos');
   
   // Custom setter that updates URL hash instead of state directly
   const setCurrentView = (view) => {
@@ -567,8 +568,14 @@ function App() {
             Inicio
           </a>
           <a 
-            onClick={() => setCurrentView('conjuntos')} 
-            className={`nav-link ${currentView === 'conjuntos' ? 'active' : ''}`}
+            onClick={() => { setCurrentView('conjuntos'); setSelectedCategoryFilter('Todos'); }} 
+            className={`nav-link ${currentView === 'conjuntos' && selectedCategoryFilter === 'Todos' ? 'active' : ''}`}
+          >
+            Productos
+          </a>
+          <a 
+            onClick={() => { setCurrentView('conjuntos'); setSelectedCategoryFilter('Conjuntos'); }} 
+            className={`nav-link ${currentView === 'conjuntos' && selectedCategoryFilter === 'Conjuntos' ? 'active' : ''}`}
           >
             Conjuntos
           </a>
@@ -706,13 +713,35 @@ function App() {
         {currentView === 'conjuntos' && (
           <>
             <header className="catalog-header">
-              <h1 className="catalog-title">Nuestros Conjuntos</h1>
-              <p className="catalog-subtitle">Explora nuestra colección completa de conjuntos No-Gi de Jiujitsu</p>
+              <h1 className="catalog-title">{selectedCategoryFilter === 'Todos' ? 'Nuestros Productos' : `Colección ${selectedCategoryFilter}`}</h1>
+              <p className="catalog-subtitle">Explora nuestra colección de indumentaria deportiva</p>
             </header>
+
+            <div className="category-filters" style={{ display: 'flex', justifyContent: 'center', gap: '1rem', margin: '2rem 0', flexWrap: 'wrap' }}>
+               {['Todos', 'Conjuntos', 'No-Gi', 'Accesorios', 'Poleras'].map(cat => (
+                 <button 
+                   key={cat} 
+                   onClick={() => setSelectedCategoryFilter(cat)}
+                   className={`category-filter-btn ${selectedCategoryFilter === cat ? 'active' : ''}`}
+                   style={{ 
+                     padding: '0.6rem 1.2rem', 
+                     borderRadius: '20px', 
+                     border: '1px solid var(--border-color)', 
+                     background: selectedCategoryFilter === cat ? 'var(--text-primary)' : 'transparent', 
+                     color: selectedCategoryFilter === cat ? 'var(--bg-primary)' : 'var(--text-primary)', 
+                     cursor: 'pointer',
+                     fontWeight: 'bold',
+                     transition: 'all 0.3s ease'
+                   }}
+                 >
+                   {cat}
+                 </button>
+               ))}
+            </div>
 
             <section className="products-section">
               <div className="product-grid">
-                {productList.map((product) => (
+                {productList.filter(p => selectedCategoryFilter === 'Todos' || p.category === selectedCategoryFilter).map((product) => (
                   <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
                     <div className="product-image-container">
                       <img src={product.image} alt={product.name} className="product-image" />
@@ -1027,6 +1056,7 @@ function App() {
                         <option value="Conjuntos">Conjuntos</option>
                         <option value="No-Gi">No-Gi</option>
                         <option value="Accesorios">Accesorios</option>
+                        <option value="Poleras">Poleras</option>
                       </select>
                     </div>
                   </div>
